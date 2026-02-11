@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="js">
 import { computed, ref } from 'vue'
 
 const isLoggedIn = ref(false)
@@ -24,10 +24,10 @@ const headerSubMenus = [
 ]
 
 const submenuLeft = ref(0)
-const activeMenu = ref<string | null>(null)
+const activeMenu = ref(null)
 
-const updateSubmenuLeft = (event: MouseEvent, menuValue: string) => {
-  const target = event.currentTarget as HTMLElement | null
+const updateSubmenuLeft = (event, menuValue) => {
+  const target = event.currentTarget
   if (!target) return
 
   const rect = target.getBoundingClientRect()
@@ -35,15 +35,15 @@ const updateSubmenuLeft = (event: MouseEvent, menuValue: string) => {
   activeMenu.value = menuValue
 }
 
-const setActiveMenu = (menuValue: string) => {
+const setActiveMenu = (menuValue) => {
   activeMenu.value = menuValue
 }
 
-const goToSubmenu = (path: string) => {
+const goToSubmenu = (path) => {
   window.history.pushState({}, '', path)
 }
 
-const handleMenuClick = (value: string) => {
+const handleMenuClick = (value) => {
   if (value === 'logout') isLoggedIn.value = false
 }
 </script>
