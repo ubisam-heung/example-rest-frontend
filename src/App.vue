@@ -68,6 +68,8 @@ const goHome = () => {
   router.push('/')
 }
 
+const footerIcons = ['mdi-facebook', 'mdi-twitter', 'mdi-linkedin', 'mdi-instagram']
+
 onMounted(() => {
   window.addEventListener('auth-changed', syncAuthState)
 })
@@ -150,6 +152,34 @@ onUnmounted(() => {
     <v-main>
       <router-view />
     </v-main>
+
+    <v-footer class="text-center d-flex flex-column ga-2 py-4" color="indigo-lighten-1">
+      <div class="d-flex ga-3">
+        <v-btn
+          v-for="icon in footerIcons"
+          :key="icon"
+          :icon="icon"
+          density="comfortable"
+          variant="text"
+          href="https://github.com/ubisam-research"
+          target="_blank"
+          rel="noopener"
+        ></v-btn>
+      </div>
+
+      <v-divider class="my-2" thickness="2" width="50"></v-divider>
+
+      <div class="text-caption font-weight-regular opacity-60">
+        Vue 3와 Vuetify로 구성한 학습 플랫폼 데모입니다. 회원가입/로그인과 JWT 기반 인증을
+        제공하며, 문제풀이와 오답노트 기능으로 학습 진행을 돕습니다.
+      </div>
+
+      <v-divider></v-divider>
+
+      <div>
+        {{ new Date().getFullYear() }} — <strong>Rest Project Example</strong>
+      </div>
+    </v-footer>
   </v-app>
 </template>
 
