@@ -1,7 +1,10 @@
 <script setup lang="js">
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { clearToken, isLoggedIn as getLoggedIn } from './services/auth'
 
-const isLoggedIn = ref(false)
+const router = useRouter()
+const isLoggedIn = ref(getLoggedIn())
 const menuItems = computed(() =>
   isLoggedIn.value
     ? [{ title: '로그아웃', value: 'logout', icon: 'mdi-logout' }]
@@ -9,6 +12,10 @@ const menuItems = computed(() =>
         { title: '로그인', value: 'login', icon: 'mdi-login' },
         { title: '회원가입', value: 'signup', icon: 'mdi-account-plus' },
       ]
+)
+
+const userIcon = computed(() =>
+  isLoggedIn.value ? 'mdi-account-check' : 'mdi-account-circle-outline'
 )
 
 const headerMenus = [
@@ -26,6 +33,10 @@ const headerSubMenus = [
 const submenuLeft = ref(0)
 const activeMenu = ref(null)
 
+const syncAuthState = () => {
+  isLoggedIn.value = getLoggedIn()
+}
+
 const updateSubmenuLeft = (event, menuValue) => {
   const target = event.currentTarget
   if (!target) return
@@ -40,18 +51,36 @@ const setActiveMenu = (menuValue) => {
 }
 
 const goToSubmenu = (path) => {
-  window.history.pushState({}, '', path)
+  router.push(path)
 }
 
 const handleMenuClick = (value) => {
-  if (value === 'logout') isLoggedIn.value = false
+  if (value === 'login') router.push('/login')
+  if (value === 'signup') router.push('/register')
+  if (value === 'logout') {
+    clearToken()
+    isLoggedIn.value = false
+    router.push('/')
+  }
 }
+
+const goHome = () => {
+  router.push('/')
+}
+
+onMounted(() => {
+  window.addEventListener('auth-changed', syncAuthState)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('auth-changed', syncAuthState)
+})
 </script>
 
 <template>
   <v-app>
     <v-app-bar color="white" elevation="1" class="header-bar">
-      <v-app-bar-title class="title-stack">
+      <v-app-bar-title class="title-stack" role="button" @click="goHome">
         <div class="text-h6">Rest Project Example</div>
         <div class="text-subtitle-2">조흥재-연구원</div>
       </v-app-bar-title>
@@ -104,7 +133,7 @@ const handleMenuClick = (value) => {
 
       <v-menu location="bottom end">
         <template #activator="{ props }">
-          <v-btn class="user-btn" icon="mdi-account-circle" variant="text" v-bind="props" />
+          <v-btn class="user-btn" :icon="userIcon" variant="text" v-bind="props" />
         </template>
         <v-list density="compact" min-width="180">
           <v-list-item
@@ -119,25 +148,7 @@ const handleMenuClick = (value) => {
     </v-app-bar>
 
     <v-main>
-      <v-container class="py-10">
-        <v-row justify="center">
-          <v-col cols="12" md="8">
-            <v-card rounded="lg" elevation="6" class="pa-6">
-              <v-card-title class="text-h5">Vuetify is ready</v-card-title>
-              <v-card-subtitle>UI kit setup for this Vue project</v-card-subtitle>
-
-              <v-card-text>
-                Try editing this page and see hot reload in action.
-              </v-card-text>
-
-              <v-card-actions>
-                <v-btn color="indigo-darken-2" variant="flat">Get Started</v-btn>
-                <v-btn variant="text">View API</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
+      <router-view />
     </v-main>
   </v-app>
 </template>
