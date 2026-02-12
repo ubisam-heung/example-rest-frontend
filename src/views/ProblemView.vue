@@ -33,43 +33,29 @@ const request = async (url, options) => {
   return response.json()
 }
 
-const resetSession = () => {
-  questions.value = []
-  answers.value = {}
-  gradeResults.value = {}
-}
-
-const syncCategoryFromRoute = () => {
-  const raw = route.query.category
-  if (!raw) {
-    selectedCategory.value = 'C'
-    return
-  }
-  const value = String(raw)
-  if (['C', 'Java', 'Python', 'Theory'].includes(value)) {
-    selectedCategory.value = value
-  } else {
-    selectedCategory.value = 'C'
-  }
-}
-
 const startSession = async () => {
-  syncCategoryFromRoute()
-  resetSession()
-  errorMessage.value = ''
   loading.value = true
+  errorMessage.value = ''
 
   try {
-    const payload = { category: selectedCategory.value }
     const data = await request(`${API_BASE}/api/exam-ai/session`, {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ category: selectedCategory.value }),
     })
     questions.value = data.items ?? []
   } catch (err) {
     errorMessage.value = err.message
   } finally {
-    loading.value = false
+    if (loading.value) {
+      loading.value = false
+    }
+  }
+}
+
+const syncCategoryFromRoute = () => {
+  const category = route.query.category
+  if (category) {
+    selectedCategory.value = category
   }
 }
 
@@ -185,10 +171,18 @@ watch(
       </v-col>
     </v-row>
 
-    <v-overlay v-model="loading" persistent :opacity="0.85" color="white" class="align-center justify-center">
-      <div class="text-center">
-        <v-progress-circular indeterminate color="black" size="48" class="mb-3" />
-        <div class="text-subtitle-1">문제를 로딩중입니다...</div>
+    <v-overlay
+      v-model="loading"
+      persistent
+      :opacity="0.55"
+      color="#111111"
+      class="align-center justify-center loading-overlay"
+    >
+      <div class="loading-card text-center">
+        <v-progress-circular indeterminate color="black" size="36" class="mb-4" />
+        <div class="text-subtitle-1">
+          문제를 로딩중입니다...
+        </div>
       </div>
     </v-overlay>
   </v-container>
@@ -229,5 +223,18 @@ watch(
   white-space: pre-wrap;
   font-family: 'IBM Plex Mono', 'Courier New', monospace;
   font-size: 0.95rem;
+}
+
+:deep(.loading-overlay) {
+  z-index: 3000;
+}
+
+.loading-card {
+  background: #ffffff;
+  color: #111;
+  border-radius: 16px;
+  padding: 24px 28px;
+  min-width: min(360px, 80vw);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
 }
 </style>
