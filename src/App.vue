@@ -50,8 +50,17 @@ const setActiveMenu = (menuValue) => {
   activeMenu.value = menuValue
 }
 
+const resolveCategory = () => {
+  if (!activeMenu.value) return 'C'
+  const value = String(activeMenu.value).toLowerCase()
+  if (value === 'java') return 'Java'
+  if (value === 'python') return 'Python'
+  if (value === 'theory') return 'Theory'
+  return 'C'
+}
+
 const goToSubmenu = (path) => {
-  router.push(path)
+  router.push({ path, query: { category: resolveCategory() } })
 }
 
 const handleMenuClick = (value) => {
